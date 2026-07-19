@@ -4,6 +4,9 @@ import * as Location from 'expo-location';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { useSurvey } from '../context/SurveyContext';
+import PrimaryButton from '../components/PrimaryButton';
+import SectionTitle from '../components/SectionTitle';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
 export default function LocationScreen() {
   const router = useRouter();
@@ -18,7 +21,6 @@ export default function LocationScreen() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setPermissionGranted(false);
-        Alert.alert('Permission Denied', 'Location permission is required.');
         setLoading(false);
         return;
       }
@@ -28,16 +30,16 @@ export default function LocationScreen() {
       });
       setLocation(loc);
     } catch (e) {
-      Alert.alert('Error', 'Failed to get location');
+      Alert.alert('Error', 'Failed to get location. Please try again.');
     }
     setLoading(false);
   }
 
   async function copyLocation() {
     if (location) {
-      const text = `Lat: ${location.coords.latitude}, Lng: ${location.coords.longitude}`;
+      const text = `Lat: ${location.coords.latitude.toFixed(6)}, Lng: ${location.coords.longitude.toFixed(6)}`;
       await Clipboard.setStringAsync(text);
-      Alert.alert('Copied', 'Location copied to clipboard!');
+      Alert.alert('Copied!', 'Location coordinates copied to clipboard.');
     }
   }
 
@@ -48,165 +50,244 @@ export default function LocationScreen() {
     }
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Current Location</Text>
+  const coordItems = location
+    ? [
+        { label: 'Latitude', value: location.coords.latitude.toFixed(6), icon: '🧭' },
+        { label: 'Longitude', value: location.coords.longitude.toFixed(6), icon: '🗺' },
+        {
+          label: 'Accuracy',
+          value: location.coords.accuracy ? `±${Math.round(location.coords.accuracy)}m` : 'N/A',
+          icon: '🎯',
+        },
+      ]
+    : [];
 
-        {!location && !loading && permissionGranted === null && (
-          <Text style={styles.hint}>Tap the button below to fetch your location</Text>
+  return (
+    <View style={styles.screen}>
+      <View style={styles.content}>
+        {!location && !loading && permissionGranted !== false && (
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconWrap}>
+              <Text style={styles.emptyIcon}>📍</Text>
+            </View>
+            <Text style={styles.emptyTitle}>No Location Captured</Text>
+            <Text style={styles.emptyMsg}>
+              Tap the button below to fetch your current GPS coordinates.
+            </Text>
+          </View>
         )}
 
         {loading && (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#2563EB" />
-            <Text style={styles.loadingText}>Fetching location...</Text>
+          <View style={styles.loadingCard}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>Fetching your location...</Text>
+            <Text style={styles.loadingSubtext}>This may take a few seconds</Text>
+          </View>
+        )}
+
+        {permissionGranted === false && !loading && (
+          <View style={styles.deniedCard}>
+            <View style={styles.deniedIconWrap}>
+              <Text style={styles.deniedIcon}>🚫</Text>
+            </View>
+            <Text style={styles.deniedTitle}>Permission Denied</Text>
+            <Text style={styles.deniedMsg}>
+              Location permission was denied. Please enable it in your device settings.
+            </Text>
           </View>
         )}
 
         {location && !loading && (
-          <View>
-            <View style={styles.coordRow}>
-              <Text style={styles.coordLabel}>Latitude</Text>
-              <Text style={styles.coordValue}>{location.coords.latitude}</Text>
-            </View>
-            <View style={styles.coordRow}>
-              <Text style={styles.coordLabel}>Longitude</Text>
-              <Text style={styles.coordValue}>{location.coords.longitude}</Text>
-            </View>
-            <View style={styles.coordRow}>
-              <Text style={styles.coordLabel}>Accuracy</Text>
-              <Text style={styles.coordValue}>
-                {location.coords.accuracy
-                  ? `${Math.round(location.coords.accuracy)}m`
-                  : 'N/A'}
-              </Text>
-            </View>
+          <View style={styles.coordCard}>
+            <SectionTitle title="GPS Coordinates" subtitle="Current position detected" />
+            {coordItems.map((item, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.coordRow,
+                  idx < coordItems.length - 1 && styles.coordBorder,
+                ]}
+              >
+                <View style={styles.coordLeft}>
+                  <Text style={styles.coordIcon}>{item.icon}</Text>
+                  <Text style={styles.coordLabel}>{item.label}</Text>
+                </View>
+                <Text style={styles.coordValue}>{item.value}</Text>
+              </View>
+            ))}
           </View>
-        )}
-
-        {permissionGranted === false && (
-          <Text style={styles.denied}>Location permission was denied</Text>
         )}
       </View>
 
       <View style={styles.actions}>
-        <Pressable style={styles.refreshBtn} onPress={fetchLocation} disabled={loading}>
-          <Text style={styles.refreshText}>
-            {loading ? 'Loading...' : 'Refresh Location'}
-          </Text>
-        </Pressable>
-
-        {location && (
+        <PrimaryButton
+          title={loading ? 'Fetching...' : location ? 'Refresh Location' : 'Get My Location'}
+          onPress={fetchLocation}
+          disabled={loading}
+          style={styles.actionBtn}
+        />
+        {location ? (
           <>
-            <Pressable style={styles.copyBtn} onPress={copyLocation}>
-              <Text style={styles.copyText}>Copy Current Location</Text>
-            </Pressable>
-            <Pressable style={styles.useBtn} onPress={useLocation}>
-              <Text style={styles.useText}>Use This Location</Text>
-            </Pressable>
+            <PrimaryButton
+              title="Copy Coordinates"
+              onPress={copyLocation}
+              variant="ghost"
+              style={styles.actionBtn}
+            />
+            <PrimaryButton
+              title="Use This Location →"
+              onPress={useLocation}
+              variant="success"
+              style={styles.actionBtn}
+            />
           </>
-        )}
+        ) : null}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
-    padding: 16,
+    backgroundColor: colors.background,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+  content: {
+    flex: 1,
+    padding: spacing.base,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 16,
-  },
-  hint: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  center: {
+  emptyCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
     alignItems: 'center',
-    paddingVertical: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
+  },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.base,
+  },
+  emptyIcon: {
+    fontSize: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  emptyMsg: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  loadingCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.xxl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
+    gap: spacing.sm,
   },
   loadingText: {
-    marginTop: 10,
-    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
+    marginTop: spacing.sm,
+  },
+  loadingSubtext: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  deniedCard: {
+    backgroundColor: colors.dangerLight,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.dangerMid,
+  },
+  deniedIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.dangerMid,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.base,
+  },
+  deniedIcon: {
+    fontSize: 32,
+  },
+  deniedTitle: {
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
+    color: colors.danger,
+    marginBottom: spacing.sm,
+  },
+  deniedMsg: {
+    fontSize: 14,
+    color: colors.danger,
+    textAlign: 'center',
+    lineHeight: 22,
+    opacity: 0.85,
+  },
+  coordCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
   },
   coordRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  coordBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.borderLight,
+  },
+  coordLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  coordIcon: {
+    fontSize: 16,
   },
   coordLabel: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
   },
   coordValue: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  denied: {
-    color: '#EF4444',
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 20,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    fontVariant: ['tabular-nums'],
   },
   actions: {
-    marginTop: 20,
-    gap: 12,
+    padding: spacing.base,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  refreshBtn: {
-    backgroundColor: '#2563EB',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  refreshText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  copyBtn: {
-    backgroundColor: '#EFF6FF',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  copyText: {
-    color: '#2563EB',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  useBtn: {
-    backgroundColor: '#059669',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  useText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  actionBtn: {
+    width: '100%',
   },
 });

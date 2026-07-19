@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
-import { Contact as ContactClass, requestPermissionsAsync } from 'expo-contacts';
+import { View, Text, FlatList, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
+import * as Contacts from 'expo-contacts';
 import ContactItem from '../components/ContactItem';
 import EmptyState from '../components/EmptyState';
+import SearchBar from '../components/SearchBar';
 import { useSurvey } from '../context/SurveyContext';
 import { useNavigation } from 'expo-router';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
 export default function ContactsScreen() {
   const navigation = useNavigation();
   const { setSelectedContact } = useSurvey();
-  const [contacts, setContacts] = useState([]);
+  const [contactList, setContactList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [granted, setGranted] = useState(false);
@@ -18,22 +20,21 @@ export default function ContactsScreen() {
   async function loadContacts() {
     setLoading(true);
     try {
-      const { status } = await requestPermissionsAsync();
+      const { status } = await Contacts.requestPermissionsAsync();
       if (status === 'granted') {
         setGranted(true);
-        const contactList = await ContactClass.getAll({ limit: 500 });
-        const formatted = await Promise.all(
-          contactList.map(async (c) => {
-            const name = await c.getFullName();
-            const phones = await c.getPhones();
-            return {
-              id: c.id,
-              name: name || 'Unknown',
-              phones: phones.map(p => ({ label: p.label, number: p.number })) || [],
-            };
-          })
-        );
-        setContacts(formatted);
+        const { data } = await Contacts.getContactsAsync({
+          fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+        });
+        const formatted = (data || []).map(c => ({
+          id: c.id,
+          name: c.name || 'Unknown',
+          phones: (c.phoneNumbers || []).map(p => ({
+            label: p.label,
+            number: p.number,
+          })),
+        }));
+        setContactList(formatted);
       } else {
         setGranted(false);
       }
@@ -49,16 +50,18 @@ export default function ContactsScreen() {
     navigation.goBack();
   }
 
-  useEffect(() => { loadContacts(); }, []);
+  useEffect(() => {
+    loadContacts();
+  }, []);
 
   const filtered = search.trim()
-    ? contacts.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
-    : contacts;
+    ? contactList.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    : contactList;
 
-  if (!fetched) {
+  if (!fetched || (loading && contactList.length === 0)) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading contacts...</Text>
       </View>
     );
@@ -66,42 +69,60 @@ export default function ContactsScreen() {
 
   if (!granted) {
     return (
-      <EmptyState
-        title="Permission Denied"
-        message="Please allow access to your contacts."
-      />
+      <View style={styles.center}>
+        <View style={styles.permCard}>
+          <View style={styles.permIconWrap}>
+            <Text style={styles.permIcon}>👤</Text>
+          </View>
+          <Text style={styles.permTitle}>Contacts Access Required</Text>
+          <Text style={styles.permMessage}>
+            Please allow access to your contacts to select a client for your survey.
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.counter}>Total found: {filtered.length}</Text>
-      <TextInput
-        style={styles.search}
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Filter contacts..."
-        placeholderTextColor="#9CA3AF"
-      />
+    <View style={styles.screen}>
+      <View style={styles.topBar}>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryBadge}>
+            <Text style={styles.summaryCount}>{filtered.length}</Text>
+          </View>
+          <Text style={styles.summaryLabel}>
+            {filtered.length === 1 ? 'contact found' : 'contacts found'}
+          </Text>
+        </View>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search contacts..."
+        />
+      </View>
+
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No contacts"
-          message={search ? 'Try a different search' : 'Your contact list is empty'}
+          icon="👤"
+          title="No contacts found"
+          message={search ? 'Try a different search term.' : 'Your contact list is empty.'}
         />
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={loading}
               onRefresh={loadContacts}
-              colors={['#2563EB']}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           renderItem={({ item }) => (
@@ -114,42 +135,93 @@ export default function ContactsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    backgroundColor: colors.background,
+    padding: spacing.xl,
   },
   loadingText: {
-    marginTop: 12,
-    color: '#6B7280',
+    marginTop: spacing.md,
+    color: colors.textSecondary,
     fontSize: 14,
+    fontWeight: fontWeight.medium,
   },
-  counter: {
-    fontSize: 13,
-    color: '#6B7280',
-    padding: 16,
-    paddingBottom: 4,
-    fontWeight: '500',
-  },
-  search: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#1F2937',
+  permCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 320,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
+    ...shadow.md,
+  },
+  permIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.base,
+  },
+  permIcon: {
+    fontSize: 32,
+  },
+  permTitle: {
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  permMessage: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  topBar: {
+    backgroundColor: colors.card,
+    paddingTop: spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  summaryBadge: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    minWidth: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+  },
+  summaryCount: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: fontWeight.bold,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
   },
   list: {
-    padding: 16,
-    paddingTop: 0,
+    padding: spacing.base,
+    paddingBottom: 32,
   },
 });

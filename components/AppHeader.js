@@ -1,14 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { colors, spacing, radius, fontWeight } from '../constants/theme';
 
-export default function AppHeader() {
+export default function AppHeader({ title, subtitle }) {
   return (
     <View style={styles.container}>
-      <View style={styles.titleRow}>
-        <Text style={styles.icon}>SFS</Text>
-        <View>
-          <Text style={styles.title}>Smart Field Survey</Text>
-          <Text style={styles.subtitle}>Student: Trika Aditya</Text>
+      <View style={styles.decorCircle} />
+      <View style={styles.decorCircle2} />
+      <View style={styles.inner}>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>SFS</Text>
+        </View>
+        <View style={styles.textWrap}>
+          <Text style={styles.title} numberOfLines={1}>
+            {title || 'Smart Field Survey'}
+          </Text>
+          {subtitle ? (
+            <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>
+          ) : null}
         </View>
       </View>
     </View>
@@ -17,36 +26,61 @@ export default function AppHeader() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2563EB',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    backgroundColor: colors.primary,
+    paddingTop: 52,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  titleRow: {
+  decorCircle: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    top: -40,
+    right: -30,
+  },
+  decorCircle2: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    top: 10,
+    right: 90,
+  },
+  inner: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  icon: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+  badge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-    marginRight: 12,
-    overflow: 'hidden',
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.md,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: fontWeight.extrabold,
+    letterSpacing: 1,
+  },
+  textWrap: {
+    flex: 1,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
     color: '#fff',
+    fontSize: 20,
+    fontWeight: fontWeight.bold,
+    letterSpacing: -0.3,
   },
   subtitle: {
+    color: 'rgba(255,255,255,0.75)',
     fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
+    fontWeight: fontWeight.medium,
     marginTop: 2,
   },
 });

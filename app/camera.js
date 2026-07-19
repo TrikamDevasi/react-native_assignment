@@ -3,6 +3,7 @@ import { View, Text, Image, Pressable, ActivityIndicator, Alert, StyleSheet } fr
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useSurvey } from '../context/SurveyContext';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
 export default function CameraScreen() {
   const router = useRouter();
@@ -16,7 +17,8 @@ export default function CameraScreen() {
   if (!permission) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Checking permissions...</Text>
       </View>
     );
   }
@@ -24,10 +26,18 @@ export default function CameraScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.center}>
-        <Text style={styles.message}>Camera permission is required</Text>
-        <Pressable style={styles.permitBtn} onPress={requestPermission}>
-          <Text style={styles.permitText}>Grant Permission</Text>
-        </Pressable>
+        <View style={styles.permCard}>
+          <View style={styles.permIconWrap}>
+            <Text style={styles.permIcon}>📷</Text>
+          </View>
+          <Text style={styles.permTitle}>Camera Access Required</Text>
+          <Text style={styles.permMessage}>
+            Please allow camera access to capture photos for your field surveys.
+          </Text>
+          <Pressable style={styles.grantBtn} onPress={requestPermission}>
+            <Text style={styles.grantBtnText}>Grant Camera Access</Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
@@ -38,9 +48,13 @@ export default function CameraScreen() {
       try {
         const result = await cameraRef.current.takePictureAsync();
         setPhoto(result.uri);
-        setCaptureTime(new Date().toLocaleTimeString());
+        setCaptureTime(new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        }));
       } catch (e) {
-        Alert.alert('Error', 'Failed to take photo');
+        Alert.alert('Error', 'Failed to take photo. Please try again.');
       }
       setIsLoading(false);
     }
@@ -52,7 +66,7 @@ export default function CameraScreen() {
   }
 
   function deletePhoto() {
-    Alert.alert('Delete Photo', 'Are you sure you want to delete this photo?', [
+    Alert.alert('Delete Photo', 'Remove this photo from your survey?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -72,36 +86,46 @@ export default function CameraScreen() {
 
   if (photo) {
     return (
-      <View style={styles.container}>
-        <Image source={{ uri: photo }} style={styles.preview} />
-        <View style={styles.photoInfo}>
-          <Text style={styles.captureTime}>Captured at: {captureTime}</Text>
-        </View>
-        <View style={styles.actions}>
-          <Pressable style={styles.retakeBtn} onPress={retakePhoto}>
-            <Text style={styles.retakeText}>Retake Photo</Text>
+      <View style={styles.previewScreen}>
+        <Image source={{ uri: photo }} style={styles.previewImage} resizeMode="cover" />
+        <View style={styles.previewBottom}>
+          {captureTime ? (
+            <View style={styles.captureTimePill}>
+              <Text style={styles.captureTimeText}>📸 Captured at {captureTime}</Text>
+            </View>
+          ) : null}
+          <View style={styles.actionRow}>
+            <Pressable style={styles.retakeBtn} onPress={retakePhoto}>
+              <Text style={styles.retakeBtnText}>Retake</Text>
+            </Pressable>
+            <Pressable style={styles.deleteBtn} onPress={deletePhoto}>
+              <Text style={styles.deleteBtnText}>Delete</Text>
+            </Pressable>
+          </View>
+          <Pressable style={styles.useBtn} onPress={usePhoto}>
+            <Text style={styles.useBtnText}>Use This Photo →</Text>
           </Pressable>
-          <Pressable style={styles.deleteBtn} onPress={deletePhoto}>
-            <Text style={styles.deleteText}>Delete Photo</Text>
-          </Pressable>
         </View>
-        <Pressable style={styles.useBtn} onPress={usePhoto}>
-          <Text style={styles.useText}>Use This Photo</Text>
-        </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.cameraScreen}>
       <CameraView ref={cameraRef} style={styles.camera} facing="back">
-        <View style={styles.camOverlay}>
+        <View style={styles.cameraOverlay}>
+          <View style={styles.viewfinder} />
           {isLoading ? (
-            <ActivityIndicator size="large" color="#fff" />
+            <View style={styles.captureArea}>
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
           ) : (
-            <Pressable style={styles.captureBtn} onPress={takePhoto}>
-              <View style={styles.captureInner} />
-            </Pressable>
+            <View style={styles.captureArea}>
+              <Pressable style={styles.captureBtn} onPress={takePhoto}>
+                <View style={styles.captureInner} />
+              </Pressable>
+              <Text style={styles.captureHint}>Tap to capture</Text>
+            </View>
           )}
         </View>
       </CameraView>
@@ -110,111 +134,186 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    padding: 20,
+    backgroundColor: colors.background,
+    padding: spacing.xl,
   },
-  message: {
-    fontSize: 16,
-    color: '#374151',
-    marginBottom: 16,
+  loadingText: {
+    marginTop: spacing.md,
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: fontWeight.medium,
+  },
+  permCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 320,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.md,
+  },
+  permIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  permIcon: {
+    fontSize: 36,
+  },
+  permTitle: {
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
-  permitBtn: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 10,
+  permMessage: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.xl,
   },
-  permitText: {
+  grantBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.full,
+    width: '100%',
+    alignItems: 'center',
+    ...shadow.primary,
+  },
+  grantBtnText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
     fontSize: 15,
+  },
+  cameraScreen: {
+    flex: 1,
+    backgroundColor: '#000',
   },
   camera: {
     flex: 1,
   },
-  camOverlay: {
+  cameraOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 60,
+    paddingVertical: spacing.xl,
+  },
+  viewfinder: {
+    width: 240,
+    height: 240,
+    borderRadius: radius.xl,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    marginTop: spacing.xxl,
+  },
+  captureArea: {
+    alignItems: 'center',
+    paddingBottom: spacing.xl,
   },
   captureBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     borderWidth: 4,
     borderColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: spacing.md,
   },
   captureInner: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#fff',
   },
-  preview: {
+  captureHint: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 13,
+    fontWeight: fontWeight.medium,
+  },
+  previewScreen: {
     flex: 1,
-    resizeMode: 'contain',
+    backgroundColor: '#000',
   },
-  photoInfo: {
-    padding: 16,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+  previewImage: {
+    flex: 1,
   },
-  captureTime: {
-    fontSize: 14,
-    color: '#6B7280',
+  previewBottom: {
+    backgroundColor: colors.card,
+    paddingTop: spacing.base,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
   },
-  actions: {
+  captureTimePill: {
+    backgroundColor: colors.background,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  captureTimeText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
+  },
+  actionRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 12,
-    backgroundColor: '#fff',
+    gap: spacing.md,
   },
   retakeBtn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#E5E7EB',
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.background,
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
-  retakeText: {
-    color: '#374151',
-    fontWeight: '600',
+  retakeBtnText: {
+    color: colors.textPrimary,
+    fontWeight: fontWeight.semibold,
+    fontSize: 14,
   },
   deleteBtn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#FEE2E2',
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerLight,
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.dangerMid,
   },
-  deleteText: {
-    color: '#EF4444',
-    fontWeight: '600',
+  deleteBtnText: {
+    color: colors.danger,
+    fontWeight: fontWeight.semibold,
+    fontSize: 14,
   },
   useBtn: {
-    marginHorizontal: 16,
-    marginBottom: 30,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.base,
+    borderRadius: radius.lg,
     alignItems: 'center',
+    ...shadow.primary,
   },
-  useText: {
+  useBtnText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: fontWeight.semibold,
   },
 });

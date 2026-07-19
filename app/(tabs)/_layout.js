@@ -1,17 +1,12 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Text, View } from 'react-native';
+import { colors, spacing, radius, shadow, fontWeight } from '../../constants/theme';
 
-function TabIcon({ label, focused }) {
-  const icons = {
-    Dashboard: '📊',
-    'New Survey': '📝',
-    History: '📋',
-    Profile: '👤',
-  };
+function TabIcon({ emoji, label, focused }) {
   return (
-    <View style={{ alignItems: 'center' }}>
-      <Text style={{ fontSize: 20 }}>{icons[label] || '📄'}</Text>
+    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
+      <Text style={[styles.tabEmoji, focused && styles.tabEmojiActive]}>{emoji}</Text>
     </View>
   );
 }
@@ -20,27 +15,34 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 0,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 8,
-          elevation: 8,
-          height: 60,
-          paddingBottom: 8,
+          backgroundColor: colors.card,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          height: 72,
+          paddingBottom: 10,
+          paddingTop: 6,
+          ...shadow.lg,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: 10,
+          fontWeight: fontWeight.semibold,
+          marginTop: 2,
+          letterSpacing: 0.3,
         },
         headerStyle: {
-          backgroundColor: '#2563EB',
+          backgroundColor: colors.primary,
+          shadowColor: 'transparent',
+          elevation: 0,
         },
         headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: fontWeight.semibold,
+          fontSize: 17,
+          letterSpacing: -0.2,
+        },
       }}
     >
       <Tabs.Screen
@@ -48,7 +50,9 @@ export default function TabLayout() {
         options={{
           title: 'Dashboard',
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ focused }) => <TabIcon label="Dashboard" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="📊" label="Dashboard" focused={focused} />
+          ),
           headerShown: false,
         }}
       />
@@ -57,7 +61,9 @@ export default function TabLayout() {
         options={{
           title: 'New Survey',
           tabBarLabel: 'New Survey',
-          tabBarIcon: ({ focused }) => <TabIcon label="New Survey" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="📝" label="New Survey" focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -65,7 +71,9 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarLabel: 'History',
-          tabBarIcon: ({ focused }) => <TabIcon label="History" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="📋" label="History" focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -73,9 +81,31 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon label="Profile" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="👤" label="Profile" focused={focused} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabItem: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabItemActive: {
+    backgroundColor: colors.primaryLight,
+  },
+  tabEmoji: {
+    fontSize: 18,
+    opacity: 0.5,
+  },
+  tabEmojiActive: {
+    opacity: 1,
+  },
+});

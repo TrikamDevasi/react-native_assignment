@@ -1,11 +1,16 @@
 import React from 'react';
-import { Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
-export default function QuickActionCard({ title, icon, onPress, color }) {
+export default function QuickActionCard({ title, icon, color, onPress }) {
+  const bgColor = color || colors.primary;
+
   return (
-    <Pressable style={[styles.card, { backgroundColor: color || '#2563EB' }]} onPress={onPress}>
-      <Text style={styles.icon}>{icon}</Text>
-      <Text style={styles.label}>{title}</Text>
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={[styles.iconWrap, { backgroundColor: bgColor + '18' }]}>
+        <Text style={styles.icon}>{icon}</Text>
+      </View>
+      <Text style={styles.label} numberOfLines={1}>{title}</Text>
     </Pressable>
   );
 }
@@ -13,26 +18,32 @@ export default function QuickActionCard({ title, icon, onPress, color }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.base,
+    paddingHorizontal: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 4,
-    minHeight: 80,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginHorizontal: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
+  },
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
   },
   icon: {
-    fontSize: 24,
-    marginBottom: 6,
+    fontSize: 20,
   },
   label: {
-    color: '#fff',
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
 });

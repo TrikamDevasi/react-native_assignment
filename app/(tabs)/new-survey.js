@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import PrimaryButton from '../../components/PrimaryButton';
+import SectionTitle from '../../components/SectionTitle';
 import { useSurvey } from '../../context/SurveyContext';
+import { colors, spacing, radius, shadow, fontWeight } from '../../constants/theme';
 
 export default function NewSurvey() {
   const router = useRouter();
@@ -20,19 +22,23 @@ export default function NewSurvey() {
     day: 'numeric',
   });
 
-  const priorities = ['Low', 'Medium', 'High'];
+  const priorities = [
+    { label: 'Low', color: colors.success },
+    { label: 'Medium', color: colors.warning },
+    { label: 'High', color: colors.danger },
+  ];
 
   function handleSubmit() {
     if (!siteName.trim()) {
-      Alert.alert('Validation Error', 'Please enter a Site Name');
+      Alert.alert('Required', 'Please enter a Site Name');
       return;
     }
     if (!clientName.trim()) {
-      Alert.alert('Validation Error', 'Please enter a Client Name');
+      Alert.alert('Required', 'Please enter a Client Name');
       return;
     }
     if (!description.trim()) {
-      Alert.alert('Validation Error', 'Please enter a Description');
+      Alert.alert('Required', 'Please enter a Description');
       return;
     }
 
@@ -52,153 +58,268 @@ export default function NewSurvey() {
     router.push('/survey-preview');
   }
 
+  const attachedItems = [
+    { icon: '📷', label: 'Photo', done: !!capturedPhoto, route: '/camera' },
+    { icon: '👤', label: selectedContact ? selectedContact.name : 'Contact', done: !!selectedContact, route: '/contacts' },
+    { icon: '📍', label: 'Location', done: !!currentLocation, route: '/location' },
+    { icon: '📋', label: 'Notes', done: !!pastedNotes, route: '/clipboard' },
+  ];
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.label}>Site Name</Text>
-      <TextInput
-        style={styles.input}
-        value={siteName}
-        onChangeText={setSiteName}
-        placeholder="Enter site name"
-        placeholderTextColor="#9CA3AF"
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.card}>
+        <SectionTitle title="Survey Details" />
+
+        <Text style={styles.fieldLabel}>Site Name</Text>
+        <TextInput
+          style={styles.input}
+          value={siteName}
+          onChangeText={setSiteName}
+          placeholder="e.g. North Block Site A"
+          placeholderTextColor={colors.textMuted}
+          returnKeyType="next"
+        />
+
+        <Text style={styles.fieldLabel}>Client Name</Text>
+        <TextInput
+          style={styles.input}
+          value={clientName}
+          onChangeText={setClientName}
+          placeholder="e.g. PT. Indofood Corp"
+          placeholderTextColor={colors.textMuted}
+          returnKeyType="next"
+        />
+
+        <Text style={styles.fieldLabel}>Description</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Describe the survey purpose and scope..."
+          placeholderTextColor={colors.textMuted}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+        />
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="Priority Level" />
+        <View style={styles.priorityRow}>
+          {priorities.map(p => {
+            const isActive = priority === p.label;
+            return (
+              <Pressable
+                key={p.label}
+                style={[
+                  styles.priorityBtn,
+                  isActive && { backgroundColor: p.color, borderColor: p.color },
+                ]}
+                onPress={() => setPriority(p.label)}
+              >
+                <Text
+                  style={[
+                    styles.priorityText,
+                    isActive && styles.priorityTextActive,
+                  ]}
+                >
+                  {p.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="Survey Date" />
+        <View style={styles.dateRow}>
+          <Text style={styles.dateIcon}>📅</Text>
+          <Text style={styles.dateText}>{dateStr}</Text>
+          <View style={styles.dateBadge}>
+            <Text style={styles.dateBadgeText}>Auto</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="Attached Data" subtitle="Tap any item to add or change" />
+        <View style={styles.attachGrid}>
+          {attachedItems.map((item, idx) => (
+            <Pressable
+              key={idx}
+              style={[styles.attachItem, item.done && styles.attachItemDone]}
+              onPress={() => router.push(item.route)}
+            >
+              <Text style={styles.attachIcon}>{item.icon}</Text>
+              <Text
+                style={[styles.attachLabel, item.done && styles.attachLabelDone]}
+                numberOfLines={1}
+              >
+                {item.done ? item.label : 'Add ' + item.icon.replace(/[^\w]/g, '')}
+              </Text>
+              {item.done ? (
+                <View style={styles.doneIndicator} />
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <PrimaryButton
+        title="Preview Survey →"
+        onPress={handleSubmit}
+        style={styles.submitBtn}
       />
-
-      <Text style={styles.label}>Client Name</Text>
-      <TextInput
-        style={styles.input}
-        value={clientName}
-        onChangeText={setClientName}
-        placeholder="Enter client name"
-        placeholderTextColor="#9CA3AF"
-      />
-
-      <Text style={styles.label}>Description</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Enter survey description"
-        placeholderTextColor="#9CA3AF"
-        multiline
-        numberOfLines={4}
-      />
-
-      <Text style={styles.label}>Priority</Text>
-      <View style={styles.priorityRow}>
-        {priorities.map(p => (
-          <Pressable
-            key={p}
-            style={[
-              styles.priorityBtn,
-              priority === p && {
-                backgroundColor:
-                  p === 'High' ? '#EF4444' : p === 'Medium' ? '#F59E0B' : '#10B981',
-              },
-            ]}
-            onPress={() => setPriority(p)}
-          >
-            <Text style={[styles.priorityText, priority === p && styles.priorityTextActive]}>
-              {p}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={styles.label}>Date</Text>
-      <View style={styles.dateBox}>
-        <Text style={styles.dateText}>{dateStr}</Text>
-      </View>
-
-      <View style={styles.dataRow}>
-        <Text style={styles.dataItem}>
-          📷 Photo: {capturedPhoto ? 'Captured' : 'None'}
-        </Text>
-        <Text style={styles.dataItem}>
-          👤 Contact: {selectedContact ? selectedContact.name : 'None'}
-        </Text>
-      </View>
-      <View style={styles.dataRow}>
-        <Text style={styles.dataItem}>
-          📍 Location: {currentLocation ? 'Set' : 'None'}
-        </Text>
-        <Text style={styles.dataItem}>
-          📝 Notes: {pastedNotes ? 'Added' : 'None'}
-        </Text>
-      </View>
-
-      <PrimaryButton title="Preview Survey" onPress={handleSubmit} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
   },
   content: {
-    padding: 16,
-    paddingBottom: 40,
+    padding: spacing.base,
+    paddingBottom: 48,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
-    marginTop: 12,
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: fontWeight.semibold,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
   },
   input: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
     fontSize: 15,
-    color: '#1F2937',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    color: colors.textPrimary,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    fontWeight: fontWeight.regular,
   },
   textArea: {
     minHeight: 100,
     textAlignVertical: 'top',
+    lineHeight: 22,
   },
   priorityRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   priorityBtn: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: '#E5E7EB',
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.background,
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
   priorityText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
   },
   priorityTextActive: {
     color: '#fff',
   },
-  dateBox: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
+    marginTop: spacing.xs,
+  },
+  dateIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
   },
   dateText: {
-    fontSize: 15,
-    color: '#1F2937',
+    flex: 1,
+    fontSize: 14,
+    fontWeight: fontWeight.medium,
+    color: colors.textPrimary,
   },
-  dataRow: {
+  dateBadge: {
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  dateBadgeText: {
+    fontSize: 10,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+    letterSpacing: 0.5,
+  },
+  attachGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
-  dataItem: {
-    fontSize: 13,
-    color: '#6B7280',
+  attachItem: {
+    width: '47%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    gap: spacing.sm,
+    position: 'relative',
+  },
+  attachItemDone: {
+    borderColor: colors.success,
+    backgroundColor: colors.successLight,
+  },
+  attachIcon: {
+    fontSize: 16,
+  },
+  attachLabel: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: fontWeight.medium,
+    color: colors.textSecondary,
+  },
+  attachLabelDone: {
+    color: colors.success,
+    fontWeight: fontWeight.semibold,
+  },
+  doneIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.success,
+  },
+  submitBtn: {
+    marginTop: spacing.sm,
   },
 });

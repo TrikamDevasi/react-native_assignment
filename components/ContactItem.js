@@ -1,11 +1,27 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
+
+const AVATAR_COLORS = [
+  colors.primary,
+  colors.purple,
+  colors.success,
+  colors.orange,
+  colors.danger,
+  colors.teal,
+];
 
 export default function ContactItem({ contact, onSelect }) {
   function getInitial(name) {
     if (!name) return '?';
     return name.trim().charAt(0).toUpperCase();
+  }
+
+  function getAvatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    const code = name.trim().charCodeAt(0);
+    return AVATAR_COLORS[code % AVATAR_COLORS.length];
   }
 
   function getPhone() {
@@ -19,7 +35,6 @@ export default function ContactItem({ contact, onSelect }) {
     const number = getPhone();
     if (number) {
       await Clipboard.setStringAsync(number);
-      alert('Number copied to clipboard');
     }
   }
 
@@ -30,25 +45,27 @@ export default function ContactItem({ contact, onSelect }) {
   }
 
   const phone = getPhone();
+  const avatarColor = getAvatarColor(contact.name);
+  const initial = getInitial(contact.name);
 
   return (
     <Pressable style={styles.item} onPress={handleSelect}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{getInitial(contact.name)}</Text>
+      <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
+        <Text style={styles.avatarText}>{initial}</Text>
       </View>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>{contact.name}</Text>
         {phone ? (
-          <Text style={styles.phone}>{phone}</Text>
+          <Text style={styles.phone} numberOfLines={1}>{phone}</Text>
         ) : (
-          <Text style={styles.noNumber}>No Number</Text>
+          <Text style={styles.noNumber}>No phone number</Text>
         )}
       </View>
-      {phone && (
+      {phone ? (
         <Pressable style={styles.copyBtn} onPress={handleCopy}>
           <Text style={styles.copyText}>Copy</Text>
         </Pressable>
-      )}
+      ) : null}
     </Pressable>
   );
 }
@@ -57,58 +74,58 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2563EB',
+    width: 46,
+    height: 46,
+    borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   avatarText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: fontWeight.bold,
   },
   info: {
     flex: 1,
   },
   name: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1F2937',
+    fontSize: 14,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
+    marginBottom: 2,
   },
   phone: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
   },
   noNumber: {
     fontSize: 12,
-    color: '#EF4444',
-    marginTop: 2,
+    color: colors.textMuted,
     fontStyle: 'italic',
   },
   copyBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: '#EFF6FF',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.primaryLight,
+    borderWidth: 1,
+    borderColor: colors.primaryMid,
+    marginLeft: spacing.sm,
   },
   copyText: {
-    color: '#2563EB',
+    color: colors.primary,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
   },
 });

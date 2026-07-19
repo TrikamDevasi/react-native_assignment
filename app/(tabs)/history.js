@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import SurveyCard from '../../components/SurveyCard';
 import EmptyState from '../../components/EmptyState';
+import SearchBar from '../../components/SearchBar';
 import { useSurvey } from '../../context/SurveyContext';
+import { colors, spacing, radius, fontWeight } from '../../constants/theme';
 
 export default function History() {
   const router = useRouter();
@@ -12,6 +14,13 @@ export default function History() {
   const [filterPriority, setFilterPriority] = useState('All');
 
   const priorities = ['All', 'Low', 'Medium', 'High'];
+
+  const priorityChipColor = {
+    All: colors.primary,
+    Low: colors.success,
+    Medium: colors.warning,
+    High: colors.danger,
+  };
 
   const filtered = surveys.filter(s => {
     const matchesSearch =
@@ -33,39 +42,58 @@ export default function History() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TextInput
-          style={styles.searchInput}
+    <View style={styles.screen}>
+      <View style={styles.topBar}>
+        <SearchBar
           value={searchText}
           onChangeText={setSearchText}
           placeholder="Search by site or client..."
-          placeholderTextColor="#9CA3AF"
         />
-      </View>
-      <View style={styles.filterRow}>
-        {priorities.map(p => (
-          <Pressable
-            key={p}
-            style={[
-              styles.chip,
-              filterPriority === p && styles.chipActive,
-            ]}
-            onPress={() => setFilterPriority(p)}
-          >
-            <Text style={[styles.chipText, filterPriority === p && styles.chipTextActive]}>
-              {p}
+        <View style={styles.filterRow}>
+          {priorities.map(p => {
+            const isActive = filterPriority === p;
+            const chipColor = priorityChipColor[p];
+            return (
+              <Pressable
+                key={p}
+                style={[
+                  styles.chip,
+                  isActive && { backgroundColor: chipColor, borderColor: chipColor },
+                ]}
+                onPress={() => setFilterPriority(p)}
+              >
+                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                  {p}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {surveys.length > 0 ? (
+          <View style={styles.countBar}>
+            <Text style={styles.countText}>
+              {filtered.length} {filtered.length === 1 ? 'survey' : 'surveys'} found
             </Text>
-          </Pressable>
-        ))}
+          </View>
+        ) : null}
       </View>
+
       {filtered.length === 0 ? (
-        <EmptyState title="No Surveys Found" message="Start a new survey to see it here." />
+        <EmptyState
+          icon="📋"
+          title={searchText || filterPriority !== 'All' ? 'No results found' : 'No Surveys Yet'}
+          message={
+            searchText || filterPriority !== 'All'
+              ? 'Try adjusting your search or filters.'
+              : 'Surveys you create will appear here.'
+          }
+        />
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <SurveyCard
               survey={item}
@@ -80,49 +108,50 @@ export default function History() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
   },
-  header: {
-    padding: 16,
-    paddingBottom: 0,
-  },
-  searchInput: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#1F2937',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+  topBar: {
+    backgroundColor: colors.card,
+    paddingTop: spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   filterRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.base,
+    gap: spacing.sm,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#E5E7EB',
-  },
-  chipActive: {
-    backgroundColor: '#2563EB',
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.background,
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
   chipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
   },
   chipTextActive: {
     color: '#fff',
   },
+  countBar: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  countText: {
+    fontSize: 12,
+    color: colors.textMuted,
+    fontWeight: fontWeight.medium,
+  },
   list: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    paddingBottom: 32,
   },
 });

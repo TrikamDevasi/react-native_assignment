@@ -3,14 +3,36 @@ import { Drawer } from 'expo-router/drawer';
 import { SurveyProvider } from '../context/SurveyContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, Text, StyleSheet } from 'react-native';
+import { colors, spacing, radius, fontWeight } from '../constants/theme';
 
 function CustomDrawerContent() {
+  const items = [
+    { label: 'Dashboard', emoji: '📊' },
+    { label: 'Camera', emoji: '📷' },
+    { label: 'Contacts', emoji: '👤' },
+    { label: 'Location', emoji: '📍' },
+    { label: 'Clipboard', emoji: '📋' },
+    { label: 'Settings', emoji: '⚙️' },
+  ];
+
   return (
     <View style={drawerStyles.container}>
       <View style={drawerStyles.header}>
-        <Text style={drawerStyles.headerTitle}>Smart Field Survey</Text>
-        <Text style={drawerStyles.headerSub}>Navigation Menu</Text>
+        <View style={drawerStyles.avatar}>
+          <Text style={drawerStyles.avatarText}>TA</Text>
+        </View>
+        <View>
+          <Text style={drawerStyles.name}>Trika Aditya</Text>
+          <Text style={drawerStyles.role}>Field Inspector</Text>
+        </View>
       </View>
+      <View style={drawerStyles.divider} />
+      {items.map((item, index) => (
+        <View key={index} style={drawerStyles.item}>
+          <Text style={drawerStyles.itemEmoji}>{item.emoji}</Text>
+          <Text style={drawerStyles.itemLabel}>{item.label}</Text>
+        </View>
+      ))}
     </View>
   );
 }
@@ -23,19 +45,25 @@ export default function RootLayout() {
           drawerContent={CustomDrawerContent}
           screenOptions={{
             drawerStyle: {
-              backgroundColor: '#fff',
-              width: 260,
+              backgroundColor: colors.card,
+              width: 270,
             },
-            drawerActiveTintColor: '#2563EB',
-            drawerInactiveTintColor: '#6B7280',
+            drawerActiveTintColor: colors.primary,
+            drawerInactiveTintColor: colors.textSecondary,
             drawerLabelStyle: {
-              fontSize: 15,
-              fontWeight: '500',
+              fontSize: 14,
+              fontWeight: fontWeight.medium,
             },
             headerStyle: {
-              backgroundColor: '#2563EB',
+              backgroundColor: colors.primary,
+              shadowColor: 'transparent',
+              elevation: 0,
             },
             headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: fontWeight.semibold,
+              fontSize: 17,
+            },
           }}
         >
           <Drawer.Screen
@@ -98,20 +126,60 @@ export default function RootLayout() {
 const drawerStyles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.card,
+    paddingTop: 0,
   },
   header: {
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: '#2563EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingTop: 52,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
   },
-  headerTitle: {
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
     color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
   },
-  headerSub: {
+  name: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: fontWeight.bold,
+  },
+  role: {
     color: 'rgba(255,255,255,0.7)',
     fontSize: 12,
-    marginTop: 4,
+    fontWeight: fontWeight.medium,
+    marginTop: 2,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.borderLight,
+    marginVertical: spacing.sm,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  itemEmoji: {
+    fontSize: 18,
+  },
+  itemLabel: {
+    fontSize: 14,
+    fontWeight: fontWeight.medium,
+    color: colors.textSecondary,
   },
 });

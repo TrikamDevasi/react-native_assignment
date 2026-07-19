@@ -2,20 +2,31 @@ import React from 'react';
 import { View, Text, ScrollView, Image, Alert, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import PrimaryButton from '../components/PrimaryButton';
+import SectionTitle from '../components/SectionTitle';
+import InfoRow from '../components/InfoRow';
 import { useSurvey } from '../context/SurveyContext';
+import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
 export default function SurveyPreview() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { currentSurvey, setCurrentSurvey, surveys, addSurvey, setSurveys } = useSurvey();
+  const { currentSurvey, setCurrentSurvey, surveys, addSurvey } = useSurvey();
 
   let survey = currentSurvey;
-
   if (params.id) {
     survey = surveys.find(s => s.id === params.id);
   }
 
   const isReadOnly = !!params.id;
+
+  function getPriorityColor() {
+    switch (survey?.priority) {
+      case 'High': return colors.danger;
+      case 'Medium': return colors.warning;
+      case 'Low': return colors.success;
+      default: return colors.textMuted;
+    }
+  }
 
   function handleSubmit() {
     if (!survey) return;
@@ -24,8 +35,8 @@ export default function SurveyPreview() {
       id: Date.now().toString(),
     };
     addSurvey(newSurvey);
-    Alert.alert('Success', 'Survey submitted!', [
-      { text: 'OK', onPress: () => router.push('/(tabs)/history') },
+    Alert.alert('Survey Submitted!', 'Your survey has been saved to history.', [
+      { text: 'View History', onPress: () => router.push('/(tabs)/history') },
     ]);
   }
 
@@ -37,186 +48,251 @@ export default function SurveyPreview() {
   if (!survey) {
     return (
       <View style={styles.center}>
-        <Text style={styles.empty}>No survey data available.</Text>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyIcon}>📋</Text>
+          <Text style={styles.emptyTitle}>No Survey Data</Text>
+          <Text style={styles.emptyMsg}>No survey data is available to preview.</Text>
+        </View>
       </View>
     );
   }
 
+  const priorityColor = getPriorityColor();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Survey Preview</Text>
-
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Site Name</Text>
-          <Text style={styles.value}>{survey.siteName}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Client</Text>
-          <Text style={styles.value}>{survey.clientName}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Description</Text>
-          <Text style={styles.value}>{survey.description}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Priority</Text>
-          <Text
-            style={[
-              styles.priority,
-              { color: survey.priority === 'High' ? '#EF4444' : survey.priority === 'Medium' ? '#F59E0B' : '#10B981' },
-            ]}
-          >
-            {survey.priority}
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Date</Text>
-          <Text style={styles.value}>{survey.date}</Text>
-        </View>
-
-        {survey.photo && (
-          <View style={styles.imageWrap}>
-            <Text style={styles.sectionLabel}>Captured Photo</Text>
-            <Image source={{ uri: survey.photo }} style={styles.image} />
+    <View style={styles.screen}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {isReadOnly ? (
+          <View style={styles.submittedBadge}>
+            <Text style={styles.submittedBadgeText}>✓ Submitted Survey</Text>
           </View>
-        )}
+        ) : null}
 
-        {survey.contact && (
-          <View style={styles.detailBox}>
-            <Text style={styles.sectionLabel}>Contact</Text>
-            <Text style={styles.detailText}>Name: {survey.contact.name}</Text>
-            {survey.contact.phones && survey.contact.phones.length > 0 && (
-              <Text style={styles.detailText}>
-                Phone: {survey.contact.phones[0].number}
+        <View style={styles.card}>
+          <SectionTitle title="Survey Information" />
+          <InfoRow label="Site Name" value={survey.siteName} />
+          <InfoRow label="Client" value={survey.clientName} />
+          <InfoRow label="Description" value={survey.description} />
+          <InfoRow label="Date" value={survey.date} />
+          <View style={styles.priorityRow}>
+            <Text style={styles.priorityLabel}>Priority</Text>
+            <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '1A' }]}>
+              <Text style={[styles.priorityText, { color: priorityColor }]}>
+                {survey.priority}
               </Text>
+            </View>
+          </View>
+        </View>
+
+        {survey.photo ? (
+          <View style={styles.card}>
+            <SectionTitle title="Captured Photo" />
+            <View style={styles.imageWrap}>
+              <Image
+                source={{ uri: survey.photo }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            </View>
+          </View>
+        ) : null}
+
+        {survey.contact ? (
+          <View style={styles.card}>
+            <SectionTitle title="Contact Information" />
+            <InfoRow label="Name" value={survey.contact.name} />
+            {survey.contact.phones && survey.contact.phones.length > 0 ? (
+              <InfoRow
+                label="Phone"
+                value={survey.contact.phones[0].number}
+                last
+              />
+            ) : (
+              <InfoRow label="Phone" value="No phone number" last />
             )}
           </View>
-        )}
+        ) : null}
 
-        {survey.location && (
-          <View style={styles.detailBox}>
-            <Text style={styles.sectionLabel}>Location</Text>
-            <Text style={styles.detailText}>
-              Lat: {survey.location.coords.latitude}
-            </Text>
-            <Text style={styles.detailText}>
-              Lng: {survey.location.coords.longitude}
-            </Text>
+        {survey.location ? (
+          <View style={styles.card}>
+            <SectionTitle title="GPS Location" />
+            <InfoRow
+              label="Latitude"
+              value={survey.location.coords.latitude.toFixed(6)}
+            />
+            <InfoRow
+              label="Longitude"
+              value={survey.location.coords.longitude.toFixed(6)}
+            />
+            {survey.location.coords.accuracy ? (
+              <InfoRow
+                label="Accuracy"
+                value={`±${Math.round(survey.location.coords.accuracy)}m`}
+                last
+              />
+            ) : null}
           </View>
-        )}
+        ) : null}
 
-        {survey.notes && (
-          <View style={styles.detailBox}>
-            <Text style={styles.sectionLabel}>Notes</Text>
-            <Text style={styles.detailText}>{survey.notes}</Text>
+        {survey.notes ? (
+          <View style={styles.card}>
+            <SectionTitle title="Notes" />
+            <View style={styles.notesBox}>
+              <Text style={styles.notesText}>{survey.notes}</Text>
+            </View>
           </View>
-        )}
-      </View>
+        ) : null}
 
-      {isReadOnly ? (
-        <Text style={styles.readOnlyText}>Viewing submitted survey</Text>
-      ) : (
-        <View style={styles.actions}>
-          <PrimaryButton title="Submit Survey" onPress={handleSubmit} color="#059669" />
-          <PrimaryButton title="Edit Survey" onPress={handleEdit} color="#D97706" />
+        <View style={styles.spacer} />
+      </ScrollView>
+
+      {!isReadOnly ? (
+        <View style={styles.actionBar}>
+          <PrimaryButton
+            title="Edit Survey"
+            onPress={handleEdit}
+            variant="secondary"
+            style={styles.actionBtnHalf}
+          />
+          <PrimaryButton
+            title="Submit Survey"
+            onPress={handleSubmit}
+            variant="success"
+            style={styles.actionBtnHalf}
+          />
         </View>
-      )}
-    </ScrollView>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    padding: spacing.base,
+    paddingBottom: 24,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: spacing.xl,
+    backgroundColor: colors.background,
   },
-  empty: {
-    color: '#6B7280',
-    fontSize: 16,
+  emptyCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
+  },
+  emptyIcon: {
+    fontSize: 36,
+    marginBottom: spacing.md,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  emptyMsg: {
+    fontSize: 14,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
-  content: {
-    padding: 16,
-    paddingBottom: 60,
+  submittedBadge: {
+    backgroundColor: colors.successLight,
+    borderWidth: 1,
+    borderColor: colors.successMid,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    alignSelf: 'center',
+    marginBottom: spacing.md,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 20,
+  submittedBadgeText: {
+    fontSize: 13,
+    fontWeight: fontWeight.semibold,
+    color: colors.success,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
   },
-  row: {
+  priorityRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    paddingTop: spacing.md,
   },
-  label: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-    textAlign: 'right',
-    flex: 1,
-    marginLeft: 10,
-  },
-  priority: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sectionLabel: {
+  priorityLabel: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-    marginTop: 12,
+    color: colors.textMuted,
+    fontWeight: fontWeight.medium,
+  },
+  priorityBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+  },
+  priorityText: {
+    fontSize: 13,
+    fontWeight: fontWeight.bold,
+    letterSpacing: 0.3,
   },
   imageWrap: {
-    marginTop: 8,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    marginTop: spacing.xs,
   },
   image: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
+    height: 220,
   },
-  detailBox: {
-    marginTop: 8,
+  notesBox: {
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    padding: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginTop: spacing.xs,
   },
-  detailText: {
-    fontSize: 13,
-    color: '#4B5563',
-    marginBottom: 2,
-  },
-  readOnlyText: {
-    textAlign: 'center',
+  notesText: {
     fontSize: 14,
-    color: '#9CA3AF',
-    fontStyle: 'italic',
+    color: colors.textSecondary,
+    lineHeight: 22,
   },
-  actions: {
-    gap: 12,
+  spacer: {
+    height: spacing.xl,
+  },
+  actionBar: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    padding: spacing.base,
+    paddingBottom: spacing.xxl,
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  actionBtnHalf: {
+    flex: 1,
   },
 });

@@ -1,131 +1,217 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import SectionTitle from '../../components/SectionTitle';
+import InfoRow from '../../components/InfoRow';
+import { useSurvey } from '../../context/SurveyContext';
+import { colors, spacing, radius, shadow, fontWeight } from '../../constants/theme';
 
 export default function Profile() {
+  const { surveys } = useSurvey();
+
   const details = {
     name: 'Trika Aditya',
     university: 'University of Indonesia',
     semester: 'Semester 6',
     major: 'Computer Science',
+    role: 'Field Inspector',
     skills: ['React Native', 'JavaScript', 'UI/UX Design', 'Mobile Development', 'Data Analysis'],
   };
 
+  const skillColors = [
+    colors.primary, colors.purple, colors.success,
+    colors.warning, colors.teal,
+  ];
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.avatarContainer}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.heroCard}>
+        <View style={styles.heroDecor} />
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>TA</Text>
         </View>
         <Text style={styles.name}>{details.name}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Education</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>University</Text>
-          <Text style={styles.value}>{details.university}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Major</Text>
-          <Text style={styles.value}>{details.major}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Semester</Text>
-          <Text style={styles.value}>{details.semester}</Text>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Skills</Text>
-        {details.skills.map((skill, index) => (
-          <View key={index} style={styles.skillItem}>
-            <Text style={styles.skillDot}>•</Text>
-            <Text style={styles.skillText}>{skill}</Text>
+        <Text style={styles.role}>{details.role}</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{surveys.length}</Text>
+            <Text style={styles.statLabel}>Surveys</Text>
           </View>
-        ))}
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>6</Text>
+            <Text style={styles.statLabel}>Semester</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>5</Text>
+            <Text style={styles.statLabel}>Skills</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="Education" />
+        <InfoRow label="University" value={details.university} />
+        <InfoRow label="Major" value={details.major} />
+        <InfoRow label="Semester" value={details.semester} last />
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="Skills" />
+        <View style={styles.skillsWrap}>
+          {details.skills.map((skill, index) => (
+            <View
+              key={index}
+              style={[
+                styles.skillChip,
+                { backgroundColor: skillColors[index % skillColors.length] + '18' },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.skillText,
+                  { color: skillColors[index % skillColors.length] },
+                ]}
+              >
+                {skill}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <SectionTitle title="About" />
+        <Text style={styles.aboutText}>
+          Field inspector with a focus on mobile survey applications and data-driven
+          site inspection workflows. Currently studying Computer Science at University of Indonesia.
+        </Text>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
   },
   content: {
-    padding: 16,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    paddingBottom: 48,
   },
-  avatarContainer: {
+  heroCard: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
     alignItems: 'center',
-    marginBottom: 24,
-    marginTop: 10,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    position: 'relative',
+    ...shadow.primary,
+  },
+  heroDecor: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    top: -60,
+    right: -40,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#2563EB',
+    width: 76,
+    height: 76,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
   avatarText: {
     color: '#fff',
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: fontWeight.extrabold,
   },
   name: {
+    color: '#fff',
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: fontWeight.extrabold,
+    letterSpacing: -0.4,
+    marginBottom: 4,
+  },
+  role: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 13,
+    fontWeight: fontWeight.medium,
+    marginBottom: spacing.lg,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: fontWeight.extrabold,
+  },
+  statLabel: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 11,
+    fontWeight: fontWeight.medium,
+    marginTop: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    marginHorizontal: spacing.md,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: colors.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 12,
-  },
-  row: {
+  skillsWrap: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
-  label: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1F2937',
-  },
-  skillItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  skillDot: {
-    fontSize: 16,
-    color: '#2563EB',
-    marginRight: 8,
+  skillChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
   },
   skillText: {
+    fontSize: 13,
+    fontWeight: fontWeight.semibold,
+  },
+  aboutText: {
     fontSize: 14,
-    color: '#374151',
+    color: colors.textSecondary,
+    lineHeight: 22,
+    marginTop: spacing.xs,
   },
 });
