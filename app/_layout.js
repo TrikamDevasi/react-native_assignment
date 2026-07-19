@@ -27,10 +27,10 @@ function CustomDrawerContent() {
     <View style={drawerStyles.container}>
       <View style={drawerStyles.header}>
         <View style={drawerStyles.avatar}>
-          <Text style={drawerStyles.avatarText}>TA</Text>
+          <Text style={drawerStyles.avatarText}>TD</Text>
         </View>
         <View>
-          <Text style={drawerStyles.name}>Trika Aditya</Text>
+          <Text style={drawerStyles.name}>Trikam Devasi</Text>
           <Text style={drawerStyles.role}>Field Inspector</Text>
         </View>
       </View>

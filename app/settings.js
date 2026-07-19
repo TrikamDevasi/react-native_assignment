@@ -33,7 +33,7 @@ export default function Settings() {
         <SectionTitle title="App Information" />
         <InfoRow label="App Name" value="Smart Field Survey" />
         <InfoRow label="Version" value="1.0.0" />
-        <InfoRow label="Developer" value="Trika Aditya" />
+        <InfoRow label="Developer" value="Trikam Devasi" />
         <InfoRow label="Platform" value="Expo / React Native" last />
       </View>
 
@@ -70,7 +70,7 @@ export default function Settings() {
         </Text>
         <View style={styles.aboutDivider} />
         <Text style={styles.aboutCredit}>
-          Built with React Native {'&'} Expo by Trika Aditya{'\n'}
+          Built with React Native {'&'} Expo by Trikam Devasi{'\n'}
           Computer Science · University of Indonesia
         </Text>
       </View>

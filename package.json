@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@expo/cli": "^54.0.9",
     "@react-navigation/drawer": "^7.13.2",
     "expo": "~54.0.0",
     "expo-camera": "~17.0.10",
@@ -13,6 +14,8 @@
     "expo-location": "~19.0.0",
     "expo-router": "~6.0.24",
     "expo-status-bar": "~3.0.9",
+    "fbjs": "^3.0.5",
+    "hermes-parser": "^0.37.0",
     "lucide-react-native": "^1.25.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",

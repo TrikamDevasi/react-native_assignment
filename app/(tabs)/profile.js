@@ -9,7 +9,7 @@ export default function Profile() {
   const { surveys } = useSurvey();
 
   const details = {
-    name: 'Trika Aditya',
+    name: 'Trikam Devasi',
     university: 'University of Indonesia',
     semester: 'Semester 6',
     major: 'Computer Science',
@@ -31,7 +31,7 @@ export default function Profile() {
       <View style={styles.heroCard}>
         <View style={styles.heroDecor} />
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>TA</Text>
+          <Text style={styles.avatarText}>TD</Text>
         </View>
         <Text style={styles.name}>{details.name}</Text>
         <Text style={styles.role}>{details.role}</Text>

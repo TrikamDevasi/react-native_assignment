@@ -44,7 +44,7 @@ export default function Dashboard() {
           <View style={styles.heroDecor2} />
           <View style={styles.heroLeft}>
             <Text style={styles.heroGreeting}>Good day</Text>
-            <Text style={styles.heroName}>Trika Aditya</Text>
+            <Text style={styles.heroName}>Trikam Devasi</Text>
             <Text style={styles.heroRole}>Computer Science · Semester 6</Text>
           </View>
           <View style={styles.heroDateBadge}>
