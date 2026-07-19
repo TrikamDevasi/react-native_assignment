@@ -48,5 +48,24 @@ export function SurveyProvider({ children }) {
 }
 
 export function useSurvey() {
-  return useContext(SurveyContext);
+  const context = useContext(SurveyContext);
+  if (!context) {
+    return {
+      surveys: [],
+      currentSurvey: null,
+      setCurrentSurvey: () => {},
+      capturedPhoto: null,
+      setCapturedPhoto: () => {},
+      selectedContact: null,
+      setSelectedContact: () => {},
+      currentLocation: null,
+      setCurrentLocation: () => {},
+      pastedNotes: '',
+      setPastedNotes: () => {},
+      addSurvey: () => {},
+      deleteSurvey: () => {},
+      getTodaysCount: () => 0,
+    };
+  }
+  return context;
 }
