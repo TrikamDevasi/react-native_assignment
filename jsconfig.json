@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-native"
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.spec.js",
+    "**/*.test.js"
+  ]
+}
