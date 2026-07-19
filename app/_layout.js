@@ -3,18 +3,26 @@ import { Drawer } from 'expo-router/drawer';
 import { SurveyProvider } from '../context/SurveyContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, Text, StyleSheet } from 'react-native';
+import {
+  LayoutDashboard,
+  Camera,
+  Users,
+  MapPin,
+  ClipboardList,
+  Settings,
+} from 'lucide-react-native';
 import { colors, spacing, radius, fontWeight } from '../constants/theme';
 
-function CustomDrawerContent() {
-  const items = [
-    { label: 'Dashboard', emoji: '📊' },
-    { label: 'Camera', emoji: '📷' },
-    { label: 'Contacts', emoji: '👤' },
-    { label: 'Location', emoji: '📍' },
-    { label: 'Clipboard', emoji: '📋' },
-    { label: 'Settings', emoji: '⚙️' },
-  ];
+const DRAWER_ITEMS = [
+  { label: 'Dashboard', Icon: LayoutDashboard },
+  { label: 'Camera', Icon: Camera },
+  { label: 'Contacts', Icon: Users },
+  { label: 'Location', Icon: MapPin },
+  { label: 'Clipboard', Icon: ClipboardList },
+  { label: 'Settings', Icon: Settings },
+];
 
+function CustomDrawerContent() {
   return (
     <View style={drawerStyles.container}>
       <View style={drawerStyles.header}>
@@ -27,9 +35,9 @@ function CustomDrawerContent() {
         </View>
       </View>
       <View style={drawerStyles.divider} />
-      {items.map((item, index) => (
+      {DRAWER_ITEMS.map((item, index) => (
         <View key={index} style={drawerStyles.item}>
-          <Text style={drawerStyles.itemEmoji}>{item.emoji}</Text>
+          <item.Icon size={18} color={colors.textSecondary} strokeWidth={1.8} />
           <Text style={drawerStyles.itemLabel}>{item.label}</Text>
         </View>
       ))}
@@ -76,38 +84,23 @@ export default function RootLayout() {
           />
           <Drawer.Screen
             name="camera"
-            options={{
-              drawerLabel: 'Camera',
-              title: 'Camera',
-            }}
+            options={{ drawerLabel: 'Camera', title: 'Camera' }}
           />
           <Drawer.Screen
             name="contacts"
-            options={{
-              drawerLabel: 'Contacts',
-              title: 'Contacts',
-            }}
+            options={{ drawerLabel: 'Contacts', title: 'Contacts' }}
           />
           <Drawer.Screen
             name="location"
-            options={{
-              drawerLabel: 'Location',
-              title: 'Location',
-            }}
+            options={{ drawerLabel: 'Location', title: 'Location' }}
           />
           <Drawer.Screen
             name="clipboard"
-            options={{
-              drawerLabel: 'Clipboard',
-              title: 'Clipboard',
-            }}
+            options={{ drawerLabel: 'Clipboard', title: 'Clipboard' }}
           />
           <Drawer.Screen
             name="settings"
-            options={{
-              drawerLabel: 'Settings',
-              title: 'Settings',
-            }}
+            options={{ drawerLabel: 'Settings', title: 'Settings' }}
           />
           <Drawer.Screen
             name="survey-preview"
@@ -127,7 +120,6 @@ const drawerStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.card,
-    paddingTop: 0,
   },
   header: {
     flexDirection: 'row',
@@ -173,9 +165,6 @@ const drawerStyles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
-  },
-  itemEmoji: {
-    fontSize: 18,
   },
   itemLabel: {
     fontSize: 14,

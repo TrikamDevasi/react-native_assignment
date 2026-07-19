@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Inbox } from 'lucide-react-native';
 import { colors, spacing, radius, fontWeight } from '../constants/theme';
 
-export default function EmptyState({ icon, title, message, actionLabel, onAction }) {
+export default function EmptyState({ Icon, title, message, actionLabel, onAction }) {
+  const IconComponent = Icon || Inbox;
+
   return (
     <View style={styles.container}>
       <View style={styles.iconWrap}>
-        <Text style={styles.icon}>{icon || '📭'}</Text>
+        <IconComponent size={36} color={colors.textMuted} strokeWidth={1.5} />
       </View>
       <Text style={styles.title}>{title || 'Nothing here yet'}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -35,9 +38,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
-  },
-  icon: {
-    fontSize: 36,
   },
   title: {
     fontSize: 18,

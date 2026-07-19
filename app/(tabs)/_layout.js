@@ -1,12 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
+import { LayoutDashboard, FilePlus, ClipboardList, User } from 'lucide-react-native';
 import { colors, spacing, radius, shadow, fontWeight } from '../../constants/theme';
 
-function TabIcon({ emoji, label, focused }) {
+const TAB_ICONS = {
+  Dashboard: LayoutDashboard,
+  'New Survey': FilePlus,
+  History: ClipboardList,
+  Profile: User,
+};
+
+function TabIcon({ name, focused }) {
+  const IconComponent = TAB_ICONS[name] || LayoutDashboard;
   return (
     <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiActive]}>{emoji}</Text>
+      <IconComponent
+        size={20}
+        color={focused ? colors.primary : colors.textMuted}
+        strokeWidth={focused ? 2.2 : 1.8}
+      />
     </View>
   );
 }
@@ -50,9 +63,7 @@ export default function TabLayout() {
         options={{
           title: 'Dashboard',
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📊" label="Dashboard" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon name="Dashboard" focused={focused} />,
           headerShown: false,
         }}
       />
@@ -61,9 +72,7 @@ export default function TabLayout() {
         options={{
           title: 'New Survey',
           tabBarLabel: 'New Survey',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📝" label="New Survey" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon name="New Survey" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -71,9 +80,7 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarLabel: 'History',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📋" label="History" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon name="History" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -81,9 +88,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="👤" label="Profile" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon name="Profile" focused={focused} />,
         }}
       />
     </Tabs>
@@ -100,12 +105,5 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {
     backgroundColor: colors.primaryLight,
-  },
-  tabEmoji: {
-    fontSize: 18,
-    opacity: 0.5,
-  },
-  tabEmojiActive: {
-    opacity: 1,
   },
 });

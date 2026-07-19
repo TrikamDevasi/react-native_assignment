@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, Image, Pressable, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
+import { Camera, RefreshCw, Trash2, Check } from 'lucide-react-native';
 import { useSurvey } from '../context/SurveyContext';
 import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
@@ -28,7 +29,7 @@ export default function CameraScreen() {
       <View style={styles.center}>
         <View style={styles.permCard}>
           <View style={styles.permIconWrap}>
-            <Text style={styles.permIcon}>📷</Text>
+            <Camera size={36} color={colors.primary} strokeWidth={1.5} />
           </View>
           <Text style={styles.permTitle}>Camera Access Required</Text>
           <Text style={styles.permMessage}>
@@ -91,19 +92,23 @@ export default function CameraScreen() {
         <View style={styles.previewBottom}>
           {captureTime ? (
             <View style={styles.captureTimePill}>
-              <Text style={styles.captureTimeText}>📸 Captured at {captureTime}</Text>
+              <Camera size={13} color={colors.textSecondary} strokeWidth={2} />
+              <Text style={styles.captureTimeText}>Captured at {captureTime}</Text>
             </View>
           ) : null}
           <View style={styles.actionRow}>
             <Pressable style={styles.retakeBtn} onPress={retakePhoto}>
+              <RefreshCw size={15} color={colors.textPrimary} strokeWidth={2} />
               <Text style={styles.retakeBtnText}>Retake</Text>
             </Pressable>
             <Pressable style={styles.deleteBtn} onPress={deletePhoto}>
+              <Trash2 size={15} color={colors.danger} strokeWidth={2} />
               <Text style={styles.deleteBtnText}>Delete</Text>
             </Pressable>
           </View>
           <Pressable style={styles.useBtn} onPress={usePhoto}>
-            <Text style={styles.useBtnText}>Use This Photo →</Text>
+            <Check size={16} color="#fff" strokeWidth={2.5} />
+            <Text style={styles.useBtnText}>Use This Photo</Text>
           </Pressable>
         </View>
       </View>
@@ -166,9 +171,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
-  },
-  permIcon: {
-    fontSize: 36,
   },
   permTitle: {
     fontSize: 18,
@@ -259,6 +261,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   captureTimePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     backgroundColor: colors.background,
     borderRadius: radius.full,
     paddingHorizontal: spacing.base,
@@ -278,10 +283,13 @@ const styles = StyleSheet.create({
   },
   retakeBtn: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors.background,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
     borderWidth: 1.5,
     borderColor: colors.border,
   },
@@ -292,10 +300,13 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors.dangerLight,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
     borderWidth: 1.5,
     borderColor: colors.dangerMid,
   },
@@ -305,10 +316,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   useBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
     backgroundColor: colors.primary,
     paddingVertical: spacing.base,
     borderRadius: radius.lg,
-    alignItems: 'center',
     ...shadow.primary,
   },
   useBtnText: {

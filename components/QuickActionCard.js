@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
-export default function QuickActionCard({ title, icon, color, onPress }) {
+export default function QuickActionCard({ title, Icon, color, onPress }) {
   const bgColor = color || colors.primary;
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={[styles.iconWrap, { backgroundColor: bgColor + '18' }]}>
-        <Text style={styles.icon}>{icon}</Text>
+        <Icon size={22} color={bgColor} strokeWidth={1.8} />
       </View>
       <Text style={styles.label} numberOfLines={1}>{title}</Text>
     </Pressable>
@@ -36,9 +36,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-  },
-  icon: {
-    fontSize: 20,
   },
   label: {
     fontSize: 11,

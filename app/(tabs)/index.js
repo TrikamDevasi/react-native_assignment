@@ -1,6 +1,16 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import {
+  LayoutDashboard,
+  FilePlus,
+  MapPin,
+  Users,
+  Camera,
+  CheckSquare,
+  Clock,
+  ClipboardList,
+} from 'lucide-react-native';
 import AppHeader from '../../components/AppHeader';
 import SectionTitle from '../../components/SectionTitle';
 import StatCard from '../../components/StatCard';
@@ -17,22 +27,13 @@ export default function Dashboard() {
   const totalCount = surveys.length;
   const recentSurveys = surveys.slice(0, 3);
 
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
-
   function handleViewSurvey(survey) {
     router.push({ pathname: '/survey-preview', params: { id: survey.id } });
   }
 
   return (
     <View style={styles.screen}>
-      <AppHeader
-        title="Smart Field Survey"
-        subtitle="Field Inspection Platform"
-      />
+      <AppHeader title="Smart Field Survey" subtitle="Field Inspection Platform" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -42,14 +43,12 @@ export default function Dashboard() {
           <View style={styles.heroDecor1} />
           <View style={styles.heroDecor2} />
           <View style={styles.heroLeft}>
-            <Text style={styles.heroGreeting}>Good day 👋</Text>
+            <Text style={styles.heroGreeting}>Good day</Text>
             <Text style={styles.heroName}>Trika Aditya</Text>
             <Text style={styles.heroRole}>Computer Science · Semester 6</Text>
           </View>
           <View style={styles.heroDateBadge}>
-            <Text style={styles.heroDateDay}>
-              {new Date().getDate()}
-            </Text>
+            <Text style={styles.heroDateDay}>{new Date().getDate()}</Text>
             <Text style={styles.heroDateMonth}>
               {new Date().toLocaleDateString('en-US', { month: 'short' })}
             </Text>
@@ -57,49 +56,34 @@ export default function Dashboard() {
         </View>
 
         <View style={styles.statsRow}>
-          <StatCard
-            icon="📊"
-            value={todayCount}
-            label="Today"
-            color={colors.primary}
-          />
-          <StatCard
-            icon="✅"
-            value={totalCount}
-            label="Total"
-            color={colors.success}
-          />
-          <StatCard
-            icon="⏳"
-            value="0"
-            label="Pending"
-            color={colors.warning}
-          />
+          <StatCard Icon={LayoutDashboard} value={todayCount} label="Today" color={colors.primary} />
+          <StatCard Icon={CheckSquare} value={totalCount} label="Total" color={colors.success} />
+          <StatCard Icon={Clock} value="0" label="Pending" color={colors.warning} />
         </View>
 
         <SectionTitle title="Quick Actions" />
         <View style={styles.actionsGrid}>
           <QuickActionCard
             title="New Survey"
-            icon="📝"
+            Icon={FilePlus}
             color={colors.primary}
             onPress={() => router.push('/(tabs)/new-survey')}
           />
           <QuickActionCard
             title="Camera"
-            icon="📷"
+            Icon={Camera}
             color={colors.purple}
             onPress={() => router.push('/camera')}
           />
           <QuickActionCard
             title="Location"
-            icon="📍"
+            Icon={MapPin}
             color={colors.success}
             onPress={() => router.push('/location')}
           />
           <QuickActionCard
             title="Contacts"
-            icon="👤"
+            Icon={Users}
             color={colors.orange}
             onPress={() => router.push('/contacts')}
           />
@@ -113,7 +97,7 @@ export default function Dashboard() {
 
         {recentSurveys.length === 0 ? (
           <EmptyState
-            icon="📋"
+            Icon={ClipboardList}
             title="No surveys yet"
             message="Create your first field survey to see it here."
             actionLabel="Start New Survey"
@@ -121,11 +105,7 @@ export default function Dashboard() {
           />
         ) : (
           recentSurveys.map(survey => (
-            <SurveyCard
-              key={survey.id}
-              survey={survey}
-              onPress={handleViewSurvey}
-            />
+            <SurveyCard key={survey.id} survey={survey} onPress={handleViewSurvey} />
           ))
         )}
       </ScrollView>

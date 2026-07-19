@@ -1,15 +1,16 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { Camera, Users, MapPin, ClipboardList } from 'lucide-react-native';
 import SectionTitle from '../components/SectionTitle';
 import InfoRow from '../components/InfoRow';
 import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
 export default function Settings() {
   const permissions = [
-    { icon: '📷', label: 'Camera', desc: 'Take survey photos', status: 'Used' },
-    { icon: '👤', label: 'Contacts', desc: 'Select client contacts', status: 'Used' },
-    { icon: '📍', label: 'Location', desc: 'Capture GPS coordinates', status: 'Used' },
-    { icon: '📋', label: 'Clipboard', desc: 'Copy and paste data', status: 'Used' },
+    { Icon: Camera, label: 'Camera', desc: 'Take survey photos', status: 'Used' },
+    { Icon: Users, label: 'Contacts', desc: 'Select client contacts', status: 'Used' },
+    { Icon: MapPin, label: 'Location', desc: 'Capture GPS coordinates', status: 'Used' },
+    { Icon: ClipboardList, label: 'Clipboard', desc: 'Copy and paste data', status: 'Used' },
   ];
 
   return (
@@ -45,7 +46,7 @@ export default function Settings() {
           >
             <View style={styles.permLeft}>
               <View style={styles.permIconWrap}>
-                <Text style={styles.permIcon}>{p.icon}</Text>
+                <p.Icon size={18} color={colors.primary} strokeWidth={1.8} />
               </View>
               <View>
                 <Text style={styles.permLabel}>{p.label}</Text>
@@ -154,9 +155,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  permIcon: {
-    fontSize: 17,
   },
   permLabel: {
     fontSize: 14,

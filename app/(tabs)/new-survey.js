@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Camera, Users, MapPin, ClipboardList, Calendar, CheckCircle2 } from 'lucide-react-native';
 import PrimaryButton from '../../components/PrimaryButton';
 import SectionTitle from '../../components/SectionTitle';
 import { useSurvey } from '../../context/SurveyContext';
@@ -26,6 +27,13 @@ export default function NewSurvey() {
     { label: 'Low', color: colors.success },
     { label: 'Medium', color: colors.warning },
     { label: 'High', color: colors.danger },
+  ];
+
+  const attachedItems = [
+    { Icon: Camera, label: 'Photo', addLabel: 'Add Photo', done: !!capturedPhoto, route: '/camera' },
+    { Icon: Users, label: selectedContact ? selectedContact.name : 'Contact', addLabel: 'Select Contact', done: !!selectedContact, route: '/contacts' },
+    { Icon: MapPin, label: 'Location', addLabel: 'Add Location', done: !!currentLocation, route: '/location' },
+    { Icon: ClipboardList, label: 'Notes', addLabel: 'Add Notes', done: !!pastedNotes, route: '/clipboard' },
   ];
 
   function handleSubmit() {
@@ -57,13 +65,6 @@ export default function NewSurvey() {
     setCurrentSurvey(surveyData);
     router.push('/survey-preview');
   }
-
-  const attachedItems = [
-    { icon: '📷', label: 'Photo', done: !!capturedPhoto, route: '/camera' },
-    { icon: '👤', label: selectedContact ? selectedContact.name : 'Contact', done: !!selectedContact, route: '/contacts' },
-    { icon: '📍', label: 'Location', done: !!currentLocation, route: '/location' },
-    { icon: '📋', label: 'Notes', done: !!pastedNotes, route: '/clipboard' },
-  ];
 
   return (
     <ScrollView
@@ -121,12 +122,7 @@ export default function NewSurvey() {
                 ]}
                 onPress={() => setPriority(p.label)}
               >
-                <Text
-                  style={[
-                    styles.priorityText,
-                    isActive && styles.priorityTextActive,
-                  ]}
-                >
+                <Text style={[styles.priorityText, isActive && styles.priorityTextActive]}>
                   {p.label}
                 </Text>
               </Pressable>
@@ -138,7 +134,7 @@ export default function NewSurvey() {
       <View style={styles.card}>
         <SectionTitle title="Survey Date" />
         <View style={styles.dateRow}>
-          <Text style={styles.dateIcon}>📅</Text>
+          <Calendar size={16} color={colors.textSecondary} strokeWidth={1.8} style={styles.dateIcon} />
           <Text style={styles.dateText}>{dateStr}</Text>
           <View style={styles.dateBadge}>
             <Text style={styles.dateBadgeText}>Auto</Text>
@@ -155,26 +151,26 @@ export default function NewSurvey() {
               style={[styles.attachItem, item.done && styles.attachItemDone]}
               onPress={() => router.push(item.route)}
             >
-              <Text style={styles.attachIcon}>{item.icon}</Text>
+              <item.Icon
+                size={16}
+                color={item.done ? colors.success : colors.textMuted}
+                strokeWidth={1.8}
+              />
               <Text
                 style={[styles.attachLabel, item.done && styles.attachLabelDone]}
                 numberOfLines={1}
               >
-                {item.done ? item.label : 'Add ' + item.icon.replace(/[^\w]/g, '')}
+                {item.done ? item.label : item.addLabel}
               </Text>
               {item.done ? (
-                <View style={styles.doneIndicator} />
+                <CheckCircle2 size={14} color={colors.success} strokeWidth={2} />
               ) : null}
             </Pressable>
           ))}
         </View>
       </View>
 
-      <PrimaryButton
-        title="Preview Survey →"
-        onPress={handleSubmit}
-        style={styles.submitBtn}
-      />
+      <PrimaryButton title="Preview Survey" onPress={handleSubmit} style={styles.submitBtn} />
     </ScrollView>
   );
 }
@@ -254,10 +250,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     marginTop: spacing.xs,
+    gap: spacing.sm,
   },
   dateIcon: {
-    fontSize: 16,
-    marginRight: spacing.sm,
+    marginRight: spacing.xs,
   },
   dateText: {
     flex: 1,
@@ -294,14 +290,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     gap: spacing.sm,
-    position: 'relative',
   },
   attachItemDone: {
     borderColor: colors.success,
     backgroundColor: colors.successLight,
-  },
-  attachIcon: {
-    fontSize: 16,
   },
   attachLabel: {
     flex: 1,
@@ -312,12 +304,6 @@ const styles = StyleSheet.create({
   attachLabelDone: {
     color: colors.success,
     fontWeight: fontWeight.semibold,
-  },
-  doneIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.success,
   },
   submitBtn: {
     marginTop: spacing.sm,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { ClipboardList } from 'lucide-react-native';
 import SurveyCard from '../../components/SurveyCard';
 import EmptyState from '../../components/EmptyState';
 import SearchBar from '../../components/SearchBar';
@@ -62,9 +63,7 @@ export default function History() {
                 ]}
                 onPress={() => setFilterPriority(p)}
               >
-                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
-                  {p}
-                </Text>
+                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{p}</Text>
               </Pressable>
             );
           })}
@@ -80,7 +79,7 @@ export default function History() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon="📋"
+          Icon={ClipboardList}
           title={searchText || filterPriority !== 'All' ? 'No results found' : 'No Surveys Yet'}
           message={
             searchText || filterPriority !== 'All'
@@ -95,11 +94,7 @@ export default function History() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <SurveyCard
-              survey={item}
-              onPress={handlePress}
-              onDelete={handleDelete}
-            />
+            <SurveyCard survey={item} onPress={handlePress} onDelete={handleDelete} />
           )}
         />
       )}

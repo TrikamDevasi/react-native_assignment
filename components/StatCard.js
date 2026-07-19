@@ -2,11 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, radius, shadow, fontWeight } from '../constants/theme';
 
-export default function StatCard({ icon, value, label, color }) {
+export default function StatCard({ Icon, value, label, color }) {
+  const accentColor = color || colors.primary;
+
   return (
-    <View style={[styles.card, { borderTopColor: color || colors.primary }]}>
-      <Text style={styles.icon}>{icon}</Text>
-      <Text style={[styles.value, { color: color || colors.primary }]}>{value}</Text>
+    <View style={[styles.card, { borderTopColor: accentColor }]}>
+      <Icon size={20} color={accentColor} strokeWidth={1.8} />
+      <Text style={[styles.value, { color: accentColor }]}>{value}</Text>
       <Text style={styles.label}>{label}</Text>
     </View>
   );
@@ -23,14 +25,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 3,
     ...shadow.sm,
   },
-  icon: {
-    fontSize: 20,
-    marginBottom: spacing.sm,
-  },
   value: {
     fontSize: 28,
     fontWeight: fontWeight.extrabold,
     letterSpacing: -0.5,
+    marginTop: spacing.sm,
   },
   label: {
     fontSize: 11,

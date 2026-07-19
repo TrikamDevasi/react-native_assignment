@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Image, Alert, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { BadgeCheck, ClipboardList } from 'lucide-react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import SectionTitle from '../components/SectionTitle';
 import InfoRow from '../components/InfoRow';
@@ -49,7 +50,7 @@ export default function SurveyPreview() {
     return (
       <View style={styles.center}>
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyIcon}>📋</Text>
+          <ClipboardList size={36} color={colors.textMuted} strokeWidth={1.5} style={styles.emptyIcon} />
           <Text style={styles.emptyTitle}>No Survey Data</Text>
           <Text style={styles.emptyMsg}>No survey data is available to preview.</Text>
         </View>
@@ -68,7 +69,8 @@ export default function SurveyPreview() {
       >
         {isReadOnly ? (
           <View style={styles.submittedBadge}>
-            <Text style={styles.submittedBadgeText}>✓ Submitted Survey</Text>
+            <BadgeCheck size={16} color={colors.success} strokeWidth={2.5} />
+            <Text style={styles.submittedBadgeText}>Submitted Survey</Text>
           </View>
         ) : null}
 
@@ -92,11 +94,7 @@ export default function SurveyPreview() {
           <View style={styles.card}>
             <SectionTitle title="Captured Photo" />
             <View style={styles.imageWrap}>
-              <Image
-                source={{ uri: survey.photo }}
-                style={styles.image}
-                resizeMode="cover"
-              />
+              <Image source={{ uri: survey.photo }} style={styles.image} resizeMode="cover" />
             </View>
           </View>
         ) : null}
@@ -106,11 +104,7 @@ export default function SurveyPreview() {
             <SectionTitle title="Contact Information" />
             <InfoRow label="Name" value={survey.contact.name} />
             {survey.contact.phones && survey.contact.phones.length > 0 ? (
-              <InfoRow
-                label="Phone"
-                value={survey.contact.phones[0].number}
-                last
-              />
+              <InfoRow label="Phone" value={survey.contact.phones[0].number} last />
             ) : (
               <InfoRow label="Phone" value="No phone number" last />
             )}
@@ -120,14 +114,8 @@ export default function SurveyPreview() {
         {survey.location ? (
           <View style={styles.card}>
             <SectionTitle title="GPS Location" />
-            <InfoRow
-              label="Latitude"
-              value={survey.location.coords.latitude.toFixed(6)}
-            />
-            <InfoRow
-              label="Longitude"
-              value={survey.location.coords.longitude.toFixed(6)}
-            />
+            <InfoRow label="Latitude" value={survey.location.coords.latitude.toFixed(6)} />
+            <InfoRow label="Longitude" value={survey.location.coords.longitude.toFixed(6)} />
             {survey.location.coords.accuracy ? (
               <InfoRow
                 label="Accuracy"
@@ -199,7 +187,6 @@ const styles = StyleSheet.create({
     ...shadow.sm,
   },
   emptyIcon: {
-    fontSize: 36,
     marginBottom: spacing.md,
   },
   emptyTitle: {
@@ -214,6 +201,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submittedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
     backgroundColor: colors.successLight,
     borderWidth: 1,
     borderColor: colors.successMid,

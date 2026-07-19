@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
 import * as Contacts from 'expo-contacts';
+import { Users } from 'lucide-react-native';
 import ContactItem from '../components/ContactItem';
 import EmptyState from '../components/EmptyState';
 import SearchBar from '../components/SearchBar';
@@ -72,7 +73,7 @@ export default function ContactsScreen() {
       <View style={styles.center}>
         <View style={styles.permCard}>
           <View style={styles.permIconWrap}>
-            <Text style={styles.permIcon}>👤</Text>
+            <Users size={36} color={colors.primary} strokeWidth={1.5} />
           </View>
           <Text style={styles.permTitle}>Contacts Access Required</Text>
           <Text style={styles.permMessage}>
@@ -94,11 +95,7 @@ export default function ContactsScreen() {
             {filtered.length === 1 ? 'contact found' : 'contacts found'}
           </Text>
         </View>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search contacts..."
-        />
+        <SearchBar value={search} onChangeText={setSearch} placeholder="Search contacts..." />
       </View>
 
       {loading ? (
@@ -107,7 +104,7 @@ export default function ContactsScreen() {
         </View>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon="👤"
+          Icon={Users}
           title="No contacts found"
           message={search ? 'Try a different search term.' : 'Your contact list is empty.'}
         />
@@ -125,9 +122,7 @@ export default function ContactsScreen() {
               tintColor={colors.primary}
             />
           }
-          renderItem={({ item }) => (
-            <ContactItem contact={item} onSelect={handleSelect} />
-          )}
+          renderItem={({ item }) => <ContactItem contact={item} onSelect={handleSelect} />}
         />
       )}
     </View>
@@ -171,9 +166,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.base,
-  },
-  permIcon: {
-    fontSize: 32,
   },
   permTitle: {
     fontSize: 18,

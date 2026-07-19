@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, Alert, ScrollView, StyleSheet } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { Hash, Phone, MapPin, ChevronRight } from 'lucide-react-native';
 import { useSurvey } from '../context/SurveyContext';
 import SectionTitle from '../components/SectionTitle';
 import PrimaryButton from '../components/PrimaryButton';
@@ -71,21 +72,21 @@ export default function ClipboardScreen() {
 
   const copyTools = [
     {
-      icon: '🗂',
+      Icon: Hash,
       label: 'Copy Survey ID',
       sublabel: surveys.length > 0 ? `ID: ${surveys[0].id.slice(0, 8)}...` : 'No surveys yet',
       onPress: copySurveyId,
       enabled: surveys.length > 0,
     },
     {
-      icon: '👤',
+      Icon: Phone,
       label: 'Copy Contact Number',
       sublabel: selectedContact ? selectedContact.name : 'No contact selected',
       onPress: copyContactNumber,
       enabled: !!selectedContact,
     },
     {
-      icon: '📍',
+      Icon: MapPin,
       label: 'Copy Coordinates',
       sublabel: currentLocation ? 'Location ready' : 'No location captured',
       onPress: copyCoordinates,
@@ -108,7 +109,11 @@ export default function ClipboardScreen() {
             onPress={tool.onPress}
           >
             <View style={[styles.copyIconWrap, tool.enabled && styles.copyIconWrapActive]}>
-              <Text style={styles.copyIcon}>{tool.icon}</Text>
+              <tool.Icon
+                size={18}
+                color={tool.enabled ? colors.primary : colors.textMuted}
+                strokeWidth={1.8}
+              />
             </View>
             <View style={styles.copyInfo}>
               <Text style={[styles.copyLabel, !tool.enabled && styles.copyLabelDisabled]}>
@@ -118,7 +123,7 @@ export default function ClipboardScreen() {
             </View>
             {tool.enabled ? (
               <View style={styles.copyArrow}>
-                <Text style={styles.copyArrowText}>›</Text>
+                <ChevronRight size={16} color={colors.primary} strokeWidth={2.5} />
               </View>
             ) : null}
           </Pressable>
@@ -215,9 +220,6 @@ const styles = StyleSheet.create({
   copyIconWrapActive: {
     backgroundColor: colors.primaryLight,
   },
-  copyIcon: {
-    fontSize: 20,
-  },
   copyInfo: {
     flex: 1,
   },
@@ -242,12 +244,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  copyArrowText: {
-    color: colors.primary,
-    fontSize: 20,
-    fontWeight: fontWeight.bold,
-    lineHeight: 24,
   },
   textArea: {
     backgroundColor: colors.background,

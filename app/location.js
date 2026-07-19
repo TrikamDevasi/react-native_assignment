@@ -3,6 +3,7 @@ import { View, Text, Pressable, ActivityIndicator, Alert, StyleSheet } from 'rea
 import * as Location from 'expo-location';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
+import { MapPin, MoveVertical, MoveHorizontal, Crosshair, ShieldOff, Copy, Navigation } from 'lucide-react-native';
 import { useSurvey } from '../context/SurveyContext';
 import PrimaryButton from '../components/PrimaryButton';
 import SectionTitle from '../components/SectionTitle';
@@ -52,12 +53,20 @@ export default function LocationScreen() {
 
   const coordItems = location
     ? [
-        { label: 'Latitude', value: location.coords.latitude.toFixed(6), icon: '🧭' },
-        { label: 'Longitude', value: location.coords.longitude.toFixed(6), icon: '🗺' },
         {
+          Icon: MoveVertical,
+          label: 'Latitude',
+          value: location.coords.latitude.toFixed(6),
+        },
+        {
+          Icon: MoveHorizontal,
+          label: 'Longitude',
+          value: location.coords.longitude.toFixed(6),
+        },
+        {
+          Icon: Crosshair,
           label: 'Accuracy',
           value: location.coords.accuracy ? `±${Math.round(location.coords.accuracy)}m` : 'N/A',
-          icon: '🎯',
         },
       ]
     : [];
@@ -68,7 +77,7 @@ export default function LocationScreen() {
         {!location && !loading && permissionGranted !== false && (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconWrap}>
-              <Text style={styles.emptyIcon}>📍</Text>
+              <MapPin size={32} color={colors.primary} strokeWidth={1.5} />
             </View>
             <Text style={styles.emptyTitle}>No Location Captured</Text>
             <Text style={styles.emptyMsg}>
@@ -88,7 +97,7 @@ export default function LocationScreen() {
         {permissionGranted === false && !loading && (
           <View style={styles.deniedCard}>
             <View style={styles.deniedIconWrap}>
-              <Text style={styles.deniedIcon}>🚫</Text>
+              <ShieldOff size={32} color={colors.danger} strokeWidth={1.5} />
             </View>
             <Text style={styles.deniedTitle}>Permission Denied</Text>
             <Text style={styles.deniedMsg}>
@@ -103,13 +112,10 @@ export default function LocationScreen() {
             {coordItems.map((item, idx) => (
               <View
                 key={idx}
-                style={[
-                  styles.coordRow,
-                  idx < coordItems.length - 1 && styles.coordBorder,
-                ]}
+                style={[styles.coordRow, idx < coordItems.length - 1 && styles.coordBorder]}
               >
                 <View style={styles.coordLeft}>
-                  <Text style={styles.coordIcon}>{item.icon}</Text>
+                  <item.Icon size={16} color={colors.textSecondary} strokeWidth={1.8} />
                   <Text style={styles.coordLabel}>{item.label}</Text>
                 </View>
                 <Text style={styles.coordValue}>{item.value}</Text>
@@ -135,7 +141,7 @@ export default function LocationScreen() {
               style={styles.actionBtn}
             />
             <PrimaryButton
-              title="Use This Location →"
+              title="Use This Location"
               onPress={useLocation}
               variant="success"
               style={styles.actionBtn}
@@ -173,9 +179,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.base,
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
   emptyTitle: {
     fontSize: 18,
@@ -226,9 +229,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.base,
   },
-  deniedIcon: {
-    fontSize: 32,
-  },
   deniedTitle: {
     fontSize: 18,
     fontWeight: fontWeight.bold,
@@ -264,9 +264,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  coordIcon: {
-    fontSize: 16,
   },
   coordLabel: {
     fontSize: 14,
