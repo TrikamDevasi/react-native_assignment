@@ -10,11 +10,13 @@ import {
   ScrollView,
   Share,
   Linking,
+  Platform,
 } from "react-native";
 
 import * as Location from "expo-location";
 
-import MapView, { Marker } from "react-native-maps";
+// Metro resolves MapComponent.web.jsx on web, MapComponent.native.jsx on native
+import MapComponent from "../../components/MapComponent";
 
 export default function LocationScreen() {
 
@@ -69,14 +71,36 @@ export default function LocationScreen() {
       });
 
       // Reverse Geocoding
-      const reverseGeoCoding =
-        await Location.reverseGeocodeAsync({
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
-        });
+      if (Platform.OS === "web") {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${currentLocation.coords.latitude}&lon=${currentLocation.coords.longitude}&format=json`,
+            { headers: { "User-Agent": "TravelGuardianApp/1.0" } }
+          );
+          const data = await res.json();
+          if (data?.address) {
+            setAddress({
+              city: data.address.city || data.address.town || data.address.village || "",
+              region: data.address.state || "",
+              country: data.address.country || "",
+              postalCode: data.address.postcode || "",
+              street: data.address.road || "",
+              district: data.address.suburb || data.address.county || "",
+            });
+          }
+        } catch (e) {
+          console.log("Web reverse geocoding failed:", e);
+        }
+      } else {
+        const reverseGeoCoding =
+          await Location.reverseGeocodeAsync({
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude,
+          });
 
-      if (reverseGeoCoding.length > 0) {
-        setAddress(reverseGeoCoding[0]);
+        if (reverseGeoCoding.length > 0) {
+          setAddress(reverseGeoCoding[0]);
+        }
       }
     }
   };
@@ -104,20 +128,40 @@ export default function LocationScreen() {
       return;
     }
 
-    const result =
-      await Location.geocodeAsync(search);
-
-    if (result.length > 0) {
-
-      setRegion({
-        latitude: result[0].latitude,
-        longitude: result[0].longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-
+    if (Platform.OS === "web") {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(search)}&format=json&limit=1`,
+          { headers: { "User-Agent": "TravelGuardianApp/1.0" } }
+        );
+        const data = await res.json();
+        if (data.length > 0) {
+          setRegion({
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon),
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+        } else {
+          Alert.alert("Place Not Found");
+        }
+      } catch (e) {
+        Alert.alert("Search Failed", e.message);
+      }
     } else {
-      Alert.alert("Place Not Found");
+      const result =
+        await Location.geocodeAsync(search);
+
+      if (result.length > 0) {
+        setRegion({
+          latitude: result[0].latitude,
+          longitude: result[0].longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      } else {
+        Alert.alert("Place Not Found");
+      }
     }
   };
 
@@ -262,20 +306,11 @@ export default function LocationScreen() {
 
       {/* Map */}
 
-      <MapView
+      <MapComponent
         style={styles.map}
         region={region}
-      >
-
-        <Marker
-          coordinate={{
-            latitude: region.latitude,
-            longitude: region.longitude,
-          }}
-          title={search || "Location"}
-        />
-
-      </MapView>
+        markerTitle={search || "Location"}
+      />
 
 
       {/* Current Location */}

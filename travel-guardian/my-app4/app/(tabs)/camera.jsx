@@ -127,7 +127,7 @@ export default function CameraScreen() {
 
       <Text style={styles.title}>Travel Guardian Camera</Text>
 
-      // camera
+      {/* camera */}
       <View style={styles.cameraContainer}>
         <CameraView
           ref={cameraRef}
@@ -139,7 +139,7 @@ export default function CameraScreen() {
         />
       </View>
 
-      //modes
+      {/* modes */}
       <View style={styles.row}>
         <Button
           title="Photo"
@@ -152,7 +152,7 @@ export default function CameraScreen() {
         />
       </View>
 
-      // control
+      {/* control */}
       <View style={styles.row}>
         <Button
           title="Switch Camera"
@@ -170,7 +170,7 @@ export default function CameraScreen() {
         />
       </View>
 
-      //use for take a photo
+      {/* use for take a photo */}
       {mode === "picture" && (
         <Button
           title="Take Photo"
@@ -194,7 +194,7 @@ export default function CameraScreen() {
         </>
       )}
 
-      // use for photo
+      {/* use for photo */}
       {photo && (
         <View>
           <Text style={styles.resultText}>Captured Photo</Text>
@@ -208,7 +208,7 @@ export default function CameraScreen() {
         </View>
       )}
 
-      // use for video
+      {/* use for video */}
       {video && (
         <View>
           <Text style={styles.resultText}>Recorded Video</Text>
