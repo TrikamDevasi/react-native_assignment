@@ -6,11 +6,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#64748b',
+        tabBarActiveTintColor: '#3b82f6',
+        tabBarInactiveTintColor: '#94a3b8',
         headerShown: true,
         headerStyle: { backgroundColor: '#0f172a' },
-        headerTitleStyle: { color: '#ffffff', fontWeight: 'bold' },
+        headerTitleStyle: { color: '#f8fafc', fontWeight: 'bold' },
         tabBarStyle: {
           backgroundColor: '#0f172a',
           borderTopColor: '#1e293b',
@@ -46,6 +46,26 @@ export default function TabLayout() {
           headerTitle: 'Part 4 & 5: Location & Tracking',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="location-outline" size={size || 24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{
+          title: 'Journal',
+          headerTitle: 'Part 8: Travel Journal',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="journal-outline" size={size || 24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="emergency"
+        options={{
+          title: 'SOS',
+          headerTitle: 'Emergency Location',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="alert-circle-outline" size={size || 24} color={color} />
           ),
         }}
       />
